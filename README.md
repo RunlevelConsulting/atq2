@@ -7,6 +7,10 @@ atq2 allows you to view the scheduled commands in your 'at' queue (or atq). You 
 I run a server that can have around 10,000 tasks scheduled using 'at'. The 'atq' command only displays the ID and the timestamp of the scheduled command which isn't as useful as it could be. In order to view the command associated with each ID you would need to then run 'at -c *ID*' but even then it will display a bunch of mostly irrelevant info. This tool allows me to quickly see the information that I need.
 
 <br>
+## Install
+
+Stick the *atq2* file into your **/usr/local/bin** directory and make sure it's executable.
+<br>
 ## Options
 
 ```bash
