@@ -1,0 +1,135 @@
+#!/bin/bash
+
+#############################################################################################
+#											    #
+# Author:  Daniel Hughes                                                                    #
+# Company: Runlevel Consulting Ltd.                                                         #
+# Website: runlevelconsulting.co.uk                                                         #
+#                                                                                           #
+# Purpose: An improved atq command that allows you to preview the scheduled commands and    #
+#	   includes ordering and filtering options.					    #
+#											    #
+#############################################################################################
+
+
+
+#############################################################################################
+## Options & Setup									   ##
+#############################################################################################
+
+INSTRUCTIONS="\nUsage: $0 [-c <num>] [-i | -t] [-g=<string>] [-n <num>]\n\nFlags:\n                -c)    Display X number of characters of scheduled command\n                -i)    Order output by Job ID\n                -t)    Order output by timestamp\n                -g)    Only display scheduled commands containing specified string\n                -n)    Display X number of lines\n"
+NUMSONLY='^[0-9]+$'
+
+
+while getopts ":c:itg:n:" o; do
+    case "${o}" in
+        c)
+            c=${OPTARG}
+            ((c++))
+            ;;
+        i)
+	    ORD="id"
+            ;;
+        t)
+	    ORD="time"
+            ;;
+        g)
+            g=${OPTARG}
+            ;;
+        n)
+            n=${OPTARG}
+            ;;
+        *)
+            echo -e "${INSTRUCTIONS}"; exit 1
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+
+
+
+
+#############################################################################################
+## Input Validation									   ##
+#############################################################################################
+
+if [ -z "${c}" ]; then
+  MAXCHARS=80
+elif [[ ${c} =~ $NUMSONLY ]] ; then
+  MAXCHARS="${c}"
+else
+  echo "The '-c' flag value must be a number." >&2; exit 1
+fi
+
+
+if [ -z "${ORD}" ]; then	ORD="time";	fi
+if [ "$ORD" == "time" ]; then
+  ADDSORT="| sort -k 6n -k 3M -k 4n -k 5 -k 7 -k 1" # http://unix.stackexchange.com/a/34860 (Yeah, I know...)
+else
+  ADDSORT="| sort"
+fi
+
+
+if [ -z "${n}" ]; then
+  ADDHEAD="999999999999999"
+elif [[ ${n} =~ $NUMSONLY ]] ; then
+  ADDHEAD=${n}
+else
+  echo "The '-n' flag value must be a number." >&2; exit 1
+fi
+
+
+if [ -z "${g}" ]; then
+  ADDGREP="\'.*\'"
+else
+  ADDGREP="${g}"
+fi
+
+
+
+
+
+#############################################################################################
+## Gather current atq									   ##
+#############################################################################################
+
+GATHERJOBS="atq $ADDSORT"
+ATQ=$(eval $GATHERJOBS)
+
+if [ "$ATQ" == "" ]; then
+  echo "There are no pending jobs in your atq." >&2; exit 1
+fi
+
+
+
+
+#############################################################################################
+## Iterate, extract and apply additional filters					   ##
+#############################################################################################
+
+COUNT=0
+while read i ;
+  do
+  AT_ID=$(echo "$i" | awk {'print $1'})
+  AT_TIME=$(echo "$i" | awk {'print $2,$3,$4,$5,$6'})
+
+  GET_JOB=$(at -c $AT_ID)
+  AT_CMD=$(echo $GET_JOB | sed 's/^[^}]*}//g')
+  ISGREP=$(echo "$AT_CMD" | grep -c $ADDGREP)
+  AT_CMD=$(echo $GET_JOB | sed 's/^[^}]*}//g' | cut -c1-$MAXCHARS)
+
+  if [ $ISGREP -gt 0 ]; then
+
+    if [[ $COUNT -lt ${ADDHEAD} ]]; then
+      ((COUNT++))
+    else
+      exit 0
+    fi
+
+    echo "$AT_ID	$AT_TIME	$AT_CMD"
+  fi
+
+done< <(echo -e "${ATQ}")
+
+
