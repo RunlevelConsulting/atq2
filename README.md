@@ -29,7 +29,7 @@ Flags:
 
 In this example, I order by timestamp, show the first 120 characters of the command and only display 5 rows.
 ```
-$ ./atq2 -t -c 120 -n 5
+$ atq2 -t -c 120 -n 5
 11131	Sun Jan 22 11:11:00 2017	 /path/to/script.sh
 11126	Sun Jan 22 11:26:00 2017	 /path/to/another/script.sh "param1" "param2" "10" "param4"
 10293	Sun Jan 22 11:33:00 2017	 curl -s -X GET "https://www.googleapis.com/youtube/v3/videos?id=9GZJeplKV18&fields=items(id,snippet(title,publishedAt,de
@@ -42,7 +42,7 @@ $ ./atq2 -t -c 120 -n 5
 
 In this example, I order by ID and only show the commands with the word 'youtube'
 ```
-$ ./atq2 -i -g youtube
+$ atq2 -i -g youtube
 10285	Sun Jan 22 11:40:00 2017	 curl -s -X GET "https://www.googleapis.com/youtube/v3/videos?id=9GZJeplKV18&fields=items(id,snippet(title,publishedAt,de
 10293	Sun Jan 22 11:33:00 2017	 curl -s -X GET "https://www.googleapis.com/youtube/v3/videos?id=oavMtUWDBTM&fields=items(id,snippet(title,publishedAt,de
 
