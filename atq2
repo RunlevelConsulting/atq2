@@ -17,7 +17,7 @@
 ## Options & Setup									   ##
 #############################################################################################
 
-INSTRUCTIONS="\nUsage: $0 [-c <num>] [-i | -t] [-g=<string>] [-n <num>]\n\nFlags:\n                -c)    Display X number of characters of scheduled command\n                -i)    Order output by Job ID\n                -t)    Order output by timestamp\n                -g)    Only display scheduled commands containing specified string\n                -n)    Display X number of lines\n"
+INSTRUCTIONS="\nUsage: $0 [-c <num>] [-i | -t] [-g <string>] [-n <num>]\n\nFlags:\n                -c)    Display X number of characters of scheduled command\n                -i)    Order output by Job ID\n                -t)    Order output by timestamp\n                -g)    Only display scheduled commands containing specified string\n                -n)    Display X number of lines\n"
 NUMSONLY='^[0-9]+$'
 
 

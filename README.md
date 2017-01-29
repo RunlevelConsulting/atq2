@@ -15,7 +15,7 @@ Stick the *atq2* file into your **/usr/local/bin** directory and make sure it's 
 ## Options
 
 ```bash
-Usage: atq2 [-c <num>] [-i | -t] [-g=<string>] [-n <num>]
+Usage: atq2 [-c <num>] [-i | -t] [-g <string>] [-n <num>]
 
 Flags:
                 -c)    Display X number of characters of scheduled command
