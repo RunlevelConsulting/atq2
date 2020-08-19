@@ -17,7 +17,7 @@
 ## Options & Setup									   ##
 #############################################################################################
 
-INSTRUCTIONS="\nUsage: $0 [-c <num>] [-i | -t] [-g <string>] [-n <num>]\n\nFlags:\n                -c)    Display X number of characters of scheduled command\n                -i)    Order output by Job ID\n                -t)    Order output by timestamp\n                -g)    Only display scheduled commands containing specified string\n                -n)    Display X number of lines\n"
+INSTRUCTIONS="\nUsage: $0 [-c <num>] [-i | -t] [-n <num>]\n\nFlags:\n                -c)    Display X number of characters of scheduled command\n                -i)    Order output by Job ID\n                -t)    Order output by timestamp\n                -n)    Display X number of lines\n"
 NUMSONLY='^[0-9]+$'
 
 
@@ -32,9 +32,6 @@ while getopts ":c:itg:n:" o; do
             ;;
         t)
 	    ORD="time"
-            ;;
-        g)
-            g=${OPTARG}
             ;;
         n)
             n=${OPTARG}
@@ -55,7 +52,7 @@ shift $((OPTIND-1))
 #############################################################################################
 
 if [ -z "${c}" ]; then
-  MAXCHARS=80
+  MAXCHARS=1000
 elif [[ ${c} =~ $NUMSONLY ]] ; then
   MAXCHARS="${c}"
 else
@@ -72,18 +69,11 @@ fi
 
 
 if [ -z "${n}" ]; then
-  ADDHEAD="999999999999999"
+  ADDHEAD=999999999999999
 elif [[ ${n} =~ $NUMSONLY ]] ; then
   ADDHEAD=${n}
 else
   echo "The '-n' flag value must be a number." >&2; exit 1
-fi
-
-
-if [ -z "${g}" ]; then
-  ADDGREP="\'.*\'"
-else
-  ADDGREP="${g}"
 fi
 
 
@@ -115,21 +105,14 @@ while read i ;
   AT_TIME=$(echo "$i" | awk {'print $2,$3,$4,$5,$6'})
 
   GET_JOB=$(at -c $AT_ID)
-  AT_CMD=$(echo $GET_JOB | sed 's/^[^}]*}//g')
-  ISGREP=$(echo "$AT_CMD" | grep -c $ADDGREP)
   AT_CMD=$(echo $GET_JOB | sed 's/^[^}]*}//g' | cut -c1-$MAXCHARS)
 
-  if [ $ISGREP -gt 0 ]; then
-
-    if [[ $COUNT -lt ${ADDHEAD} ]]; then
-      ((COUNT++))
-    else
-      exit 0
-    fi
-
-    echo "$AT_ID	$AT_TIME	$AT_CMD"
+  if [[ $COUNT -lt ${ADDHEAD} ]]; then
+    ((COUNT++))
+  else
+    exit 0
   fi
 
+    echo "$AT_ID	$AT_TIME	$AT_CMD"
+
 done< <(echo -e "${ATQ}")
-
-
